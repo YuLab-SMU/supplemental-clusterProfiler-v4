@@ -1,0 +1,82 @@
+---
+biblio-style: apalike
+highlight_bw: yes
+output:
+  bookdown::pdf_document2:
+    toc: false
+    includes:
+      in_header: header.tex
+    dev: "cairo_pdf"
+    latex_engine: xelatex
+    fig_caption: yes
+geometry: margin=0.45in
+link-citations: yes
+---
+
+**Supplemental File of**
+
+\begingroup\Large
+**clusterProfiler 4.0: A universal enrichment tool for functional and comparative study**
+\endgroup
+
+**Tianzhi Wu§, Erqiang Hu§, Meijun Chen, Pingfan Guo, Zehan Dai, Tingze Feng, Shuangbin Xu, Lang Zhou, Wenli Tang, Li Zhan, Xiaocong Fu, Shanshan Liu, Xiaochen Bo\* and Guangchuang Yu\* **
+
+^\*^correspondence: Guangchuang Yu \<gcyu1@smu.edu.cn\> and Xiaochen Bo \<boxc@bmi.ac.cn\>
+
+
+\renewcommand{\figurename}{Fig.}
+\newcommand{\beginsupplement}{%
+\setcounter{table}{0}
+\renewcommand{\thetable}{S\arabic{table}}%
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{S\arabic{figure}}%
+}
+
+\beginsupplement
+
+```{r, echo=FALSE, message=FALSE, results='hide'}
+require(kableExtra)
+options(knitr.table.fromat = "latex")
+knitr::opts_chunk$set(fig.pos= "!ht")
+#knitr::opts_chunk$set(out.width="90%")
+knitr::opts_chunk$set(fig.align="center")
+usepackage_latex("float")
+usepackage_latex("makecell")
+usepackage_latex("booktabs")
+```
+
+```{r, echo=FALSE, message=FALSE}
+library(DOSE)
+library(clusterProfiler)
+library(enrichplot)
+```
+
+# R packages that depends on clusterProfiler
+
+
+The `clusterProfiler` library is one of the fundamental packages and it had been incorporated in more than twenty R packages (in CRAN or Bioconductor) to perform functional enrichment analysis for different topics, especially for cancer research.
+
+```{r}
+db <- utils::available.packages(repo=BiocManager::repositories())
+pkgs <- tools::package_dependencies('clusterProfiler', db=db, 
+                            which = c("Depends", "Imports"), 
+                            reverse=TRUE)[[1]]
+pkgs                                                                      
+```
+
+```{r}
+library(kableExtra)
+d <- data.frame(Package = pkgs,
+Description = sapply(pkgs, function(p) gsub("\n", " ", packageDescription(p)$Title)
+))
+caption <- "R packages that rely on clusterProfiler to perform functional analysis."
+knitr::kable(d, caption = caption)
+```
+
+
+# Examples of using clusterProfiler
+
+
+**NOTE:** source codes and datasets to produce this file can be obtained online^[<https://github.com/YuLab-SMU/supplemental-clusterProfiler-v4>].
+
+# References
