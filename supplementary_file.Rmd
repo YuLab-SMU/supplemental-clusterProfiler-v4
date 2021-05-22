@@ -19,7 +19,7 @@ link-citations: yes
 **clusterProfiler 4.0: A universal enrichment tool for functional and comparative study**
 \endgroup
 
-**Tianzhi Wu§, Erqiang Hu§, Meijun Chen, Pingfan Guo, Zehan Dai, Tingze Feng, Shuangbin Xu, Lang Zhou, Wenli Tang, Li Zhan, Xiaocong Fu, Shanshan Liu, Xiaochen Bo\* and Guangchuang Yu\* **
+**Tianzhi Wu^§^, Erqiang Hu^§^, Meijun Chen, Pingfan Guo, Zehan Dai, Tingze Feng, Shuangbin Xu, Lang Zhou, Wenli Tang, Li Zhan, Xiaocong Fu, Shanshan Liu, Xiaochen Bo^\*^ and Guangchuang Yu^\*^ **
 
 ^\*^correspondence: Guangchuang Yu \<gcyu1@smu.edu.cn\> and Xiaochen Bo \<boxc@bmi.ac.cn\>
 
@@ -29,7 +29,6 @@ link-citations: yes
 \setcounter{table}{0}
 \renewcommand{\thetable}{S\arabic{table}}%
 \setcounter{figure}{0}
-\renewcommand{\thefigure}{S\arabic{figure}}%
 }
 
 \beginsupplement
@@ -40,23 +39,49 @@ options(knitr.table.fromat = "latex")
 knitr::opts_chunk$set(fig.pos= "!ht")
 #knitr::opts_chunk$set(out.width="90%")
 knitr::opts_chunk$set(fig.align="center")
+knitr::opts_chunk$set(cache=TRUE)
 usepackage_latex("float")
 usepackage_latex("makecell")
 usepackage_latex("booktabs")
 ```
 
 ```{r, echo=FALSE, message=FALSE}
+library(org.Hs.eg.db)
 library(DOSE)
 library(clusterProfiler)
 library(enrichplot)
+library(ggplot2)
+library(forcats)
+library(ChIPseeker)
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+slice = clusterProfiler::slice
 ```
+
+# Installation
+
+To install `clusterProfiler` package, please enter the following command in R:
+
+```r
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("clusterProfiler")
+```
+
+To reproduce examples in this document, you need to install several extra packages:
+
+```r
+install.packages(c("forcats", "ggplot2", "ggnewscale", "ggupset"))
+BiocManager::install(c("org.Hs.eg.db", "enrichplot", 
+            "ChIPseeker", "TxDb.Hsapiens.UCSC.hg19.knownGene"))
+```
+
 
 # R packages that depends on clusterProfiler
 
 
 The `clusterProfiler` library is one of the fundamental packages and it had been incorporated in more than twenty R packages (in CRAN or Bioconductor) to perform functional enrichment analysis for different topics, especially for cancer research.
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 db <- utils::available.packages(repo=BiocManager::repositories())
 pkgs <- tools::package_dependencies('clusterProfiler', db=db, 
                             which = c("Depends", "Imports"), 
@@ -64,11 +89,17 @@ pkgs <- tools::package_dependencies('clusterProfiler', db=db,
 pkgs                                                                      
 ```
 
-```{r}
+```{r echo=FALSE, eval=T}
 library(kableExtra)
+
+## to extract package title using the following commands,
+## you need to have all packages installed.
 d <- data.frame(Package = pkgs,
-Description = sapply(pkgs, function(p) gsub("\n", " ", packageDescription(p)$Title)
-))
+                Description = sapply(pkgs, function(p) {
+                    gsub("\n", " ", packageDescription(p)$Title)
+                })
+            )
+save(pkgs, d, file = "cache/deps.rda", compress="xz")            
 caption <- "R packages that rely on clusterProfiler to perform functional analysis."
 knitr::kable(d, caption = caption)
 ```
@@ -76,7 +107,189 @@ knitr::kable(d, caption = caption)
 
 # Examples of using clusterProfiler
 
+This session provides source codes to reproduce the figures presented in the manuscript. 
+
+## GO enrichment analysis
+
+```{r fig.width=17, fig.height=9, fig.cap="Gene ontology enrichment analysis."}
+library(clusterProfiler)
+library(enrichplot)
+
+## geneList for GSEA examples
+data(geneList, package="DOSE")
+
+## fold change > 2 as DE genes, for ORA examples
+de <- names(geneList)[abs(geneList) > 2]
+
+
+ego <- enrichGO(de, OrgDb = "org.Hs.eg.db", ont="BP", readable=TRUE)
+
+## use simplify to remove redundant terms
+ego2 <- simplify(ego, cutoff=0.7, by="p.adjust", select_fun=min)
+
+
+## visualization
+ego <- pairwise_termsim(ego)
+ego2 <- pairwise_termsim(ego2)
+
+p1 <- emapplot(ego, cex_label_category=.8, cex_line=.5)
+p2 <- emapplot(ego2, cex_label_category=.8, cex_line=.5)
+cowplot::plot_grid(p1, p2, labels=c("A", "B"))
+```
+
+```{r echo=FALSE}
+save(ego, ego2, p1, p2, file = "cache/Fig1.rda", compress='xz')
+pg <- cowplot::plot_grid(p1, p2, labels=c("A", "B"))
+ggsave(pg, file="Figures/Fig1.pdf", width=17, height=9)
+ggsave(pg, file="Figures/Fig1.png", width=17, height=9)
+```
+
+## KEGG enrichment analysis
+
+```{r fig.width=14, fig.height=6, message=FALSE, warning=FALSE, fig.cap="KEGG pathway enrichment analysis."}
+kk <- gseKEGG(geneList, organism = "hsa")
+
+## sorted by absolute values of NES
+kk2 <- arrange(kk, abs(NES)) 
+
+## visualization
+kp1 <- gseaplot2(kk2, 1:5, pvalue_table=F, base_size=14) 
+kp2 <- upsetplot(kk2, n=5)
+cowplot::plot_grid(kp1, kp2, rel_widths=c(1, .5), labels=c("A", "B"))
+```
+
+
+
+```{r echo=FALSE}
+save(kk, kk2, kp1, kp2, file = "cache/Fig2.rda", compress='xz')
+pg <- cowplot::plot_grid(kp1, kp2, rel_widths=c(1, .5), labels=c("A", "B"))
+
+ggsave(pg, file="Figures/Fig2.png", width=14, height=6)
+ggsave(pg, file="Figures/Fig2.pdf", width=14, height=6)
+```
+
+## Universal interface for biomedical gene sets
+
+```{r message=FALSE, warning=FALSE}
+## downloaded from https://wikipathways-data.wmcloud.org/current/gmt/
+gmt <- 'wikipathways-20210310-gmt-Homo_sapiens.gmt'
+wp <- read.gmt.wp(gmt)
+ewp <- GSEA(geneList, TERM2GENE=wp[,c("wpid", "gene")], TERM2NAME=wp[,c("wpid", "name")])
+```
+
+## Functional interpretation of genomic regions of interest
+
+```{r message=FALSE, fig.cap="Functional enrichment analysis of genomic regions of interest.", fig.width=14, fig.height=6}
+library(ChIPseeker)
+## the file can be downloaded using `downloadGSMbedFiles("GSM1295076")`
+file <- "GSM1295076_CBX6_BF_ChipSeq_mergedReps_peaks.bed.gz"
+gr <- readPeakFile(file)
+
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+TxDb <- TxDb.Hsapiens.UCSC.hg19.knownGene
+genes <- seq2gene(gr, tssRegion=c(-1000, 1000), flankDistance = 3000, TxDb) 
+
+library(clusterProfiler)
+## downloaded from https://maayanlab.cloud/Enrichr/geneSetLibrary?mode=text&libraryName=ENCODE_and_ChEA_Consensus_TFs_from_ChIP-X
+encode <- read.gmt("ENCODE_and_ChEA_Consensus_TFs_from_ChIP-X.txt")
+g <- bitr(genes, 'ENTREZID', 'SYMBOL', 'org.Hs.eg.db')
+x <- enricher(g$SYMBOL, TERM2GENE=encode)
+enrichplot::cnetplot(x, cex_label_gene=0.6)
+```
+
+
+```{r echo=FALSE}
+save(gr, genes, g, x, file = "cache/Fig3.rda", compress='xz')
+pg <- enrichplot::cnetplot(x, cex_label_gene=0.6)
+ggsave(pg, file="Figures/Fig3.png", width=10, height=7)
+ggsave(pg, file="Figures/Fig3.pdf", width=10, height=7)
+```
+
+## Comparison for different conditions
+
+```{r fig.width=9, fig.height=5, fig.show='hide'}
+data(DE_GSE8057)
+
+xx <- compareCluster(Gene~time+treatment, data=DE_GSE8057, fun = enricher, 
+              TERM2GENE=wp[,c("wpid", "gene")], TERM2NAME=wp[,c("wpid", "name")])
+
+pp <- dotplot(xx, x="time") + facet_grid(~treatment) + 
+    aes(x=fct_relevel(time, c('0h', '2h', '6h', '24h'))) + xlab(NULL)
+```
+
+```{r fig.width=9, fig.height=5, fig.cap="Comparing functional profiles among different levels of conditions."}
+print(pp)    
+```
+
+
+```{r echo=FALSE}
+save(xx, pp, file = "cache/Fig4.rda", compress='xz')
+ggsave(pp, filename = "Figures/Fig4.pdf", width=9, height=5)
+ggsave(pp, filename = "Figures/Fig4.png", width=9, height=5)
+```
+
+
+
+## Visualization using ggplot2
+
+```{r message=FALSE, warning=FALSE, fig.width=14, fig.height=4, fig.cap="Visualization enrichment results using ggplot2."}
+library(forcats)
+library(ggplot2)
+
+## downloaded from https://wikipathways-data.wmcloud.org/current/gmt/
+gmt <- 'wikipathways-20210310-gmt-Homo_sapiens.gmt'
+wp <- read.gmt.wp(gmt)
+ewp <- GSEA(geneList, TERM2GENE=wp[,c("wpid", "gene")], TERM2NAME=wp[,c("wpid", "name")])
+
+ewp2 <- arrange(ewp, abs(NES)) %>% 
+        group_by(sign(NES)) %>% 
+        slice(1:5)
+ego3 <- mutate(ego, richFactor = Count / as.numeric(sub("/\\d+", "", BgRatio)))
+
+g1 <- ggplot(ego3, showCategory = 10, 
+  aes(richFactor, fct_reorder(Description, richFactor))) + 
+  geom_segment(aes(xend=0, yend = Description)) +
+  geom_point(aes(color=p.adjust, size = Count)) +
+  scale_color_viridis_c(guide=guide_colorbar(reverse=TRUE)) +
+  scale_size_continuous(range=c(2, 10)) +
+  theme_dose(12) + 
+  xlab("Rich Factor") +
+  ylab(NULL) + 
+  ggtitle("Biological Processes")
+  
+g2 <- ggplot(ewp2, showCategory=10, 
+        aes(NES, fct_reorder(Description, NES), fill=qvalues)) + 
+    geom_col() + 
+    scale_fill_continuous(low='red', high='blue', 
+                        guide=guide_colorbar(reverse=TRUE)) + 
+    theme_dose(12) + 
+    xlab("Normalized Enrichment Score") + 
+    ylab(NULL) + 
+    ggtitle("WikiPathways")
+
+cowplot::plot_grid(g1, g2, labels=c("A", "B"))
+```
+
+
+```{r echo=FALSE}
+pp <- cowplot::plot_grid(g1, g2, labels=c("A", "B"))
+save(ewp2, ego3, g1, g2, file = "cache/Fig5.rda", compress='xz')
+ggsave(pp, filename = "Figures/Fig5.pdf", width=14, height=4)
+ggsave(pp, filename = "Figures/Fig5.png", width=14, height=4)
+```
+
+
 
 **NOTE:** source codes and datasets to produce this file can be obtained online^[<https://github.com/YuLab-SMU/supplemental-clusterProfiler-v4>].
+
+
+# Session information
+
+Here is the output of `sessionInfo()` of the system on which the Supplemental file was compiled:
+
+```{r, echo=FALSE}
+sessionInfo()
+```
+
 
 # References
