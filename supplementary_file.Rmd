@@ -57,6 +57,70 @@ library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 slice = clusterProfiler::slice
 ```
 
+
+# R packages that depends on clusterProfiler
+
+
+The `clusterProfiler` library is one of the fundamental packages and it had been incorporated in more than twenty R packages (in CRAN or Bioconductor) to perform functional enrichment analysis for different topics, especially for cancer research.
+
+```{r warning=FALSE, message=FALSE}
+db <- utils::available.packages(repo=BiocManager::repositories())
+pkgs <- tools::package_dependencies('clusterProfiler', db=db, 
+              which = c("Depends", "Imports"), reverse=TRUE)[[1]]
+sort(pkgs)                                                                      
+```
+
+```{r echo=FALSE, eval=FALSE}
+## to extract package title using the following commands,
+## you need to have all packages installed.
+## d <- data.frame(Package = pkgs,
+##                Description = sapply(pkgs, function(p) {
+##                    gsub("\n", " ", packageDescription(p)$Title)
+##                })
+##            )
+
+repo=BiocManager::repositories()
+i = which(names(repo) == "CRAN")
+pkgs.cran <- tools::package_dependencies('clusterProfiler', 
+                            db=utils::available.packages(repo=repo[i]), 
+                    which = c("Depends", "Imports"), reverse=TRUE)[[1]]
+
+pkgs.bioc <- tools::package_dependencies('clusterProfiler', 
+                            db=utils::available.packages(repo=repo[-i]), 
+                            which = c("Depends", "Imports"), 
+                            reverse=TRUE)[[1]]                            
+d1 <- data.frame(Package = pkgs.cran,
+                Description = sapply(pkgs.cran, ypages:::packageTitle)
+            )
+d2 <- data.frame(Package = pkgs.bioc,
+                Description = sapply(pkgs.bioc, ypages:::packageTitle, repo="BioC")
+            )  
+d <- rbind(d1, d2)                      
+save(pkgs, d, file = "cache/deps.rda", compress="xz")  
+```
+
+```{r echo=FALSE}
+library(kableExtra)
+
+load('cache/deps.rda')
+d <- d[order(d[,1]),]
+row.names(d) = NULL
+d[,2] <- gsub("\"", "", d[,2])
+caption <- "R packages that rely on clusterProfiler to perform functional analysis."
+knitr::kable(d, booktabs = T, position = "!ht", caption = caption) |>
+ kable_styling(
+                latex_options = c(
+                                  "striped"#,
+                #                  "scale_down"
+                                  ),
+                full_width = T,
+                font_size = 8,
+                stripe_color = "gray!10",
+                position="center"
+  ) |> 
+  column_spec(1, width = "9em", latex_valign = "m")
+```
+
 # Installation
 
 To install `clusterProfiler` package, please enter the following command in R:
@@ -73,35 +137,6 @@ To reproduce examples in this document, you need to install several extra packag
 install.packages(c("forcats", "ggplot2", "ggnewscale", "ggupset"))
 BiocManager::install(c("org.Hs.eg.db", "enrichplot", 
             "ChIPseeker", "TxDb.Hsapiens.UCSC.hg19.knownGene"))
-```
-
-
-# R packages that depends on clusterProfiler
-
-
-The `clusterProfiler` library is one of the fundamental packages and it had been incorporated in more than twenty R packages (in CRAN or Bioconductor) to perform functional enrichment analysis for different topics, especially for cancer research.
-
-```{r warning=FALSE, message=FALSE}
-db <- utils::available.packages(repo=BiocManager::repositories())
-pkgs <- tools::package_dependencies('clusterProfiler', db=db, 
-                            which = c("Depends", "Imports"), 
-                            reverse=TRUE)[[1]]
-pkgs                                                                      
-```
-
-```{r echo=FALSE, eval=T}
-library(kableExtra)
-
-## to extract package title using the following commands,
-## you need to have all packages installed.
-d <- data.frame(Package = pkgs,
-                Description = sapply(pkgs, function(p) {
-                    gsub("\n", " ", packageDescription(p)$Title)
-                })
-            )
-save(pkgs, d, file = "cache/deps.rda", compress="xz")            
-caption <- "R packages that rely on clusterProfiler to perform functional analysis."
-knitr::kable(d, caption = caption)
 ```
 
 
