@@ -1,0 +1,28 @@
+Software,Repo,Annotation,Supported organisms,ID conversion,Updated KEGG,External annotation data,Support GMT file,Algorithm,Selection of background set,Profile comparison,Output,Tidy interface,Support ggplot2,Visualization methods,Remove redundant terms
+clusterProfiler,Bioconductor,"GO, KEGG, WikiPathways",plenty,Y,Y,Y,Y,"ORA, GSEA",Y,Y,"enrichResult, gseaResult, compareClusterResult (S4)",Y,Y,11,Y
+DOSE,Bioconductor," DisGeNE, DO, NCG",1,N,NA,N,N,"ORA, GSEA",Y,N,"enrichResult, gseaResult (S4)",Y,Y,11,Y
+fgsea,Bioconductor,NA,NA,Y,NA,Y,Y,"ORA, GSEA",Y,N,data.table,Y,Y,2,N
+ReactomePA,Bioconductor,Reactome,7,N,NA,N,N,"ORA, GSEA",Y,N,"enrichResult, gseaResult (S4)",Y,Y,11,N
+GOstats,Bioconductor,NA,NA,N,NA,Y,N,ORA,Y,N,GOHyperGResult (S4),N,N,1,N
+enrichR,CRAN,"GO, KEGG, WikiPathways, BioCarta, Reactome, GEO, GeneSigDB, HPO, KEA, MSigDB, COVID-19 Related Gene Sets",5,Y,N,N,N,ORA,N,N,list,N,N,3,N
+GSA,CRAN,NA,NA,N,NA,Y,Y,Gene set analysis,N,N,GSA (S3),N,N,1,N
+globaltest,Bioconductor,"GO, KEGG, MSigDB, Anni",21,N,N,N,N,regression analysis,N,N,gt (S4),N,N,2,N
+gage,Bioconductor,"GO, KEGG",plenty,Y,Y,Y,N,GSEA,N,N,list,N,N,0,Y
+gprofiler2,CRAN,"GO, KEGG, Reactome,WikiPathways, miRTarBase, TRANSFAC, Human Protein Atlas, protein complexes from CORUM, HPO",plenty,Y,N,Y,Y,ORA,N,Y,list,N,N,1,N
+SPIA,Bioconductor,KEGG,plenty,N,Y,N,N,Signaling Pathway Impact Analysis,Y,N,data.frame,Y,Y,1,N
+safe,Bioconductor,"GO, KEGG, PFAM, Reactome",20,N,N,Y,N,"ORA, Wilcoxon rank sum, Pearson’s chi-squared type statistic, t-statistic ",N,N,SAFE (S4),N,N,2,N
+CePa,CRAN,"NCI_Nature, KEGG, BioCarta, Reactome",1,N,N,N,N,CePa,Y,N,cepa (S3) ,N,N,3,N
+GANPA,CRAN,NA,NA,N,NA,Y,N,GANPA,N,N,.csv files,N,N,0,N
+PADOG,Bioconductor,KEGG,1,N,Y,Y,N,PADOG,N,Y,data.frame,Y,Y,0,N
+ViSEAGO,Bioconductor,GO,21,N,N,N,N,"ORA, GSEA",N,Y,"fgsea, enrich_GO_terms (S4)",N,N,2,N
+GOGANPA,CRAN,NA,NA,N,NA,Y,N,GO-Functional-Network-based Gene-Set-Analysis,N,N,.csv file,N,N,0,N
+GSAR,Bioconductor,NA,NA,N,NA,Y,N, two-sample Nnparametric multivariate test,N,N,list,N,N,0,N
+netgsa,CRAN,NA,NA,N,NA,Y,N,netgsa,N,N,list,N,N,3,N
+sigPathway,Bioconductor,NA,NA,N,NA,Y,N,"GSEA, sigPathway",N,N,list,N,N,0,N
+SeqGSEA,Bioconductor,NA,NA,Y,NA,Y,Y,GSEA,N,N,SeqGeneSet (S4) ,N,N,0,N
+hypeR,Bioconductor,"MSigDB, KEGG, Reactome, MetaboAnalyst",11,N,N,Y,N,"ORA, GSEA",Y,N,hyp (R6) ,N,N,3,N
+escape,Bioconductor,MSigDB,11,N,N,Y,N,GSEA,N,N,data.frame ,N,N,6,N
+methylGSA,Bioconductor,"GO, KEGG, Reactome",1,Y,N,N,N,"ORA, GSEA",N,N,data.frame,Y,Y,0,N
+enrichTF,Bioconductor,Transcription factor information,2,N,NA,N,N,"t-tests, ORA",N,N,list,N,N,0,N
+DEGraph,Bioconductor,KEGG,plenty,N,Y,Y,N,t-tests,N,N,list,N,N,1,N
+famat,Bioconductor,"GO, KEGG, Wikipathways, Reactome",1,N,Y,N,N,ORA,N,N,list,N,N,0,N

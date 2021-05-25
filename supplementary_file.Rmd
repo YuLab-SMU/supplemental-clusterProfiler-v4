@@ -55,6 +55,18 @@ library(forcats)
 library(ChIPseeker)
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 slice = clusterProfiler::slice
+
+
+CRANpkg <- function (pkg) {
+    cran <- "https://CRAN.R-project.org/package"
+    fmt <- "[%s](%s=%s)"
+    sprintf(fmt, pkg, cran, pkg)
+}
+
+Biocpkg <- function (pkg) {
+    sprintf("[%s](http://bioconductor.org/packages/%s)", pkg, pkg)
+}
+
 ```
 
 
@@ -121,6 +133,51 @@ knitr::kable(d, booktabs = T, position = "!ht", caption = caption) |>
   column_spec(1, width = "9em", latex_valign = "m")
 ```
 
+# Comparing clusterProfiler with other tools
+
+```{r echo=FALSE}
+x <- read.csv("enrichment-packages.csv")
+
+
+header <- gsub("\\.", "\\ ", colnames(x)) %>%
+          linebreak(align="l", linebreaker = ",")
+# header[2] <- paste0(header[2], footnote_marker_symbol(1, "latex"))
+x[,2] = ifelse(x[,2] == "CRAN", 1, 2)
+
+caption = "Comparing clusterProfiler with other tools"
+
+kbl(x, booktabs = T, col.names=header, position = "!ht", caption=caption) %>%
+  kable_styling(latex_options = c("striped", "scale_down"), 
+        full_width=T, font_size=8,
+        stripe_color = "gray!10",
+        position="center") %>%
+  column_spec(1, width="6em") %>%    
+  column_spec(2, width="2em") %>%  
+  column_spec(3, width="8em") %>%
+  column_spec(4, width="5em") %>%
+  column_spec(5, width="4em") %>%
+  column_spec(6, width="3em") %>%
+  column_spec(7, width="4em") %>%
+  column_spec(8, width="3em") %>%
+  column_spec(9, width="8em") %>%  
+  column_spec(10, width="5em") %>%
+  column_spec(11, width="4em") %>%
+  column_spec(12, width="10em") %>%
+  column_spec(13, width="4em") %>%
+  column_spec(14, width="4em") %>%
+  column_spec(15, width="5em") %>% 
+  column_spec(16, width="5em") %>%
+  footnote(number = c("Repo: 1 for CRAN and 2 for Bioconductor", 
+  "Supported organisms: 'NA' for not applicable as there is no species annotation data internally supported by the package; 'plenty' for hundreds or thousands species supported (mostly for KEGG and/or GO)",
+  "Tidy interface: whether the output object can be processed directly using tidy tools such as dplyr",
+  "Support ggplot2: whether the output object can be visualized directly using ggplot2 command",
+  "Y for supported, N for not supported and NA for not applicable")) %>%
+  add_header_above(c(" ", " ", "Input and annotation" = 6, "Method" = 3, "Interpretation" = 5)) %>% 
+  row_spec(0, font_size=8)
+``` 
+ 
+
+
 # Installation
 
 To install `clusterProfiler` package, please enter the following command in R:
@@ -138,6 +195,21 @@ install.packages(c("forcats", "ggplot2", "ggnewscale", "ggupset"))
 BiocManager::install(c("org.Hs.eg.db", "enrichplot", 
             "ChIPseeker", "TxDb.Hsapiens.UCSC.hg19.knownGene"))
 ```
+
+# Data sets
+
+Several data sets were used in this document, including:
+
++ `geneList` provided by the `r Biocpkg("DOSE")` package
++ `DE_GSE8057` provided by the `r Biocpkg("clusterProfiler")` package
++ `GSM1295076_CBX6_BF_ChipSeq_mergedReps_peaks.bed.gz` provided by the `r Biocpkg("ChIPseeker")` package
+
+
+The `geneList` was derived from the R package `r Biocpkg("breastCancerMAINZ")` that contains 200 breast cancer samples, including 29 samples in grade I, 136 samples in grade II and 35 samples in grade III. The ratio of geometric mean of grade III samples versue geometric mean of grade I samples for each gene was computed. The `geneList` data set contains logarithm of these ratios (base 2). 
+
+The `DE_GSE8057` data set XXXXXXXXXX
+
+The GSM1295076_CBX6_BF_ChipSeq_mergedReps_peaks.bed.gz file can be accessed via `ChIPseeker::getSampleFiles()[[4]]` or downloaded using the command `ChIPseeker::downloadGSMbedFiles("GSM1295076")`. Experimental design and protocols are provided in <https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM1295076>. 
 
 
 # Examples of using clusterProfiler
@@ -167,14 +239,14 @@ ego2 <- simplify(ego, cutoff=0.7, by="p.adjust", select_fun=min)
 ego <- pairwise_termsim(ego)
 ego2 <- pairwise_termsim(ego2)
 
-p1 <- emapplot(ego, cex_label_category=.8, cex_line=.5)
-p2 <- emapplot(ego2, cex_label_category=.8, cex_line=.5)
-cowplot::plot_grid(p1, p2, labels=c("A", "B"))
+p1 <- emapplot(ego, cex_label_category=.8, cex_line=.5) + coord_cartesian()
+p2 <- emapplot(ego2, cex_label_category=.8, cex_line=.5) + coord_cartesian()
+cowplot::plot_grid(p1, p2, labels=c("A", "B"), rel_widths=c(1, 1.2))
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, eval=FALSE}
 save(ego, ego2, p1, p2, file = "cache/Fig1.rda", compress='xz')
-pg <- cowplot::plot_grid(p1, p2, labels=c("A", "B"))
+pg <- cowplot::plot_grid(p1 + coord_cartesian(), p2 + coord_cartesian(), labels=c("A", "B"), rel_widths=c(1, 1.2))
 ggsave(pg, file="Figures/Fig1.pdf", width=17, height=9)
 ggsave(pg, file="Figures/Fig1.png", width=17, height=9)
 ```
@@ -182,6 +254,7 @@ ggsave(pg, file="Figures/Fig1.png", width=17, height=9)
 ## KEGG enrichment analysis
 
 ```{r fig.width=14, fig.height=6, message=FALSE, warning=FALSE, fig.cap="KEGG pathway enrichment analysis."}
+data(geneList, package="DOSE")
 kk <- gseKEGG(geneList, organism = "hsa")
 
 ## sorted by absolute values of NES
@@ -195,7 +268,7 @@ cowplot::plot_grid(kp1, kp2, rel_widths=c(1, .5), labels=c("A", "B"))
 
 
 
-```{r echo=FALSE}
+```{r echo=FALSE, eval=FALSE}
 save(kk, kk2, kp1, kp2, file = "cache/Fig2.rda", compress='xz')
 pg <- cowplot::plot_grid(kp1, kp2, rel_widths=c(1, .5), labels=c("A", "B"))
 
@@ -203,14 +276,6 @@ ggsave(pg, file="Figures/Fig2.png", width=14, height=6)
 ggsave(pg, file="Figures/Fig2.pdf", width=14, height=6)
 ```
 
-## Universal interface for biomedical gene sets
-
-```{r message=FALSE, warning=FALSE}
-## downloaded from https://wikipathways-data.wmcloud.org/current/gmt/
-gmt <- 'wikipathways-20210310-gmt-Homo_sapiens.gmt'
-wp <- read.gmt.wp(gmt)
-ewp <- GSEA(geneList, TERM2GENE=wp[,c("wpid", "gene")], TERM2NAME=wp[,c("wpid", "name")])
-```
 
 ## Functional interpretation of genomic regions of interest
 
@@ -233,7 +298,7 @@ enrichplot::cnetplot(x, cex_label_gene=0.6)
 ```
 
 
-```{r echo=FALSE}
+```{r echo=FALSE, eval=FALSE}
 save(gr, genes, g, x, file = "cache/Fig3.rda", compress='xz')
 pg <- enrichplot::cnetplot(x, cex_label_gene=0.6)
 ggsave(pg, file="Figures/Fig3.png", width=10, height=7)
@@ -243,6 +308,10 @@ ggsave(pg, file="Figures/Fig3.pdf", width=10, height=7)
 ## Comparison for different conditions
 
 ```{r fig.width=9, fig.height=5, fig.show='hide'}
+## downloaded from https://wikipathways-data.wmcloud.org/current/gmt/
+gmt <- 'wikipathways-20210310-gmt-Homo_sapiens.gmt'
+wp <- read.gmt.wp(gmt)
+
 data(DE_GSE8057)
 
 xx <- compareCluster(Gene~time+treatment, data=DE_GSE8057, fun = enricher, 
@@ -257,12 +326,11 @@ print(pp)
 ```
 
 
-```{r echo=FALSE}
+```{r echo=FALSE, eval=FALSE}
 save(xx, pp, file = "cache/Fig4.rda", compress='xz')
 ggsave(pp, filename = "Figures/Fig4.pdf", width=9, height=5)
 ggsave(pp, filename = "Figures/Fig4.png", width=9, height=5)
 ```
-
 
 
 ## Visualization using ggplot2
@@ -271,9 +339,6 @@ ggsave(pp, filename = "Figures/Fig4.png", width=9, height=5)
 library(forcats)
 library(ggplot2)
 
-## downloaded from https://wikipathways-data.wmcloud.org/current/gmt/
-gmt <- 'wikipathways-20210310-gmt-Homo_sapiens.gmt'
-wp <- read.gmt.wp(gmt)
 ewp <- GSEA(geneList, TERM2GENE=wp[,c("wpid", "gene")], TERM2NAME=wp[,c("wpid", "name")])
 
 ewp2 <- arrange(ewp, abs(NES)) %>% 
@@ -306,7 +371,7 @@ cowplot::plot_grid(g1, g2, labels=c("A", "B"))
 ```
 
 
-```{r echo=FALSE}
+```{r echo=FALSE, eval=FALSE}
 pp <- cowplot::plot_grid(g1, g2, labels=c("A", "B"))
 save(ewp2, ego3, g1, g2, file = "cache/Fig5.rda", compress='xz')
 ggsave(pp, filename = "Figures/Fig5.pdf", width=14, height=4)
@@ -327,4 +392,3 @@ sessionInfo()
 ```
 
 
-# References
