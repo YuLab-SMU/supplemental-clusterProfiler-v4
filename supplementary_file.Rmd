@@ -213,7 +213,7 @@ Moreover, `r Biocpkg("clusterProfiler")` has been incorporated into different wo
 # Comparing clusterProfiler with other tools
 
 
-Here, we compare `clusterProfiler` with other R packages that also can perform functional enrichment analysis (Table S2). The packages in Table S2 was ordered by monthly download stats (April 2021). 
+Here, we compare `clusterProfiler` with other R packages that also can perform functional enrichment analysis (Table S2). The packages in Table S2 were ordered by monthly download stats (April 2021). 
 
 ```{r eval=FALSE, echo=FALSE}
 load("dlstats.rda")
