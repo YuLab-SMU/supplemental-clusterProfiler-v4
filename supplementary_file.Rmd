@@ -39,7 +39,7 @@ options(knitr.table.fromat = "latex")
 knitr::opts_chunk$set(fig.pos= "!ht")
 #knitr::opts_chunk$set(out.width="90%")
 knitr::opts_chunk$set(fig.align="center")
-knitr::opts_chunk$set(cache=TRUE)
+knitr::opts_chunk$set(cache=FALSE)
 usepackage_latex("float")
 usepackage_latex("makecell")
 usepackage_latex("booktabs")
@@ -308,7 +308,6 @@ The `ENCODE_and_ChEA_Consensus_TFs_from_ChIP-X` was downloaded from <https://maa
 The WikiPathways, `wikipathways-20210310-gmt-Homo_sapiens.gmt` was downloaded from <https://wikipathways-data.wmcloud.org/current/gmt/>. This gene set was used to identify biological pathways using community curated knowledge. 
 
 
-\newpage
 
 # Examples of using clusterProfiler
 
@@ -339,14 +338,20 @@ ego2 <- pairwise_termsim(ego2)
 
 p1 <- emapplot(ego, cex_label_category=.8, cex_line=.5) + coord_cartesian()
 p2 <- emapplot(ego2, cex_label_category=.8, cex_line=.5) + coord_cartesian()
-cowplot::plot_grid(p1, p2, labels=c("A", "B"), rel_widths=c(1, 1.2))
+
+p1 <- p1 + scale_fill_continuous(low = "#e06663", high = "#327eba", name = "p.adjust",
+                              guide = guide_colorbar(reverse = TRUE, order=1), trans='log10') 
+p2 <- p2 + scale_fill_continuous(low = "#e06663", high = "#327eba", name = "p.adjust",
+                              guide = guide_colorbar(reverse = TRUE, order=1), trans='log10')
+                              
+cowplot::plot_grid(p1, p2, labels=c("A", "B"), rel_widths=c(1, 1.2))                              
 ```
 
 ```{r echo=FALSE, eval=FALSE}
 save(ego, ego2, p1, p2, file = "cache/Fig1.rda", compress='xz')
-pg <- cowplot::plot_grid(p1 + coord_cartesian(), p2 + coord_cartesian(), labels=c("A", "B"), rel_widths=c(1, 1.2))
+pg <- cowplot::plot_grid(p1, p2, labels=c("A", "B"), rel_widths=c(1, 1.2))
 ggsave(pg, file="Figures/Fig1.pdf", width=17, height=9)
-ggsave(pg, file="Figures/Fig1.png", width=17, height=9)
+ggsave(pg, file="Figures/Fig1.png", width=17, height=9, dpi = 150)
 ```
 
 ## KEGG enrichment analysis
@@ -359,7 +364,8 @@ kk <- gseKEGG(geneList, organism = "hsa")
 kk2 <- arrange(kk, abs(NES)) 
 
 ## visualization
-kp1 <- gseaplot2(kk2, 1:5, pvalue_table=F, base_size=14) 
+color <- c("#f7ca64", "#43a5bf", "#86c697", "#a670d6", "#ef998a")
+kp1 <- gseaplot2(kk2, 1:5, color = color, pvalue_table=F, base_size=14) 
 kp2 <- upsetplot(kk2, n=5)
 cowplot::plot_grid(kp1, kp2, rel_widths=c(1, .5), labels=c("A", "B"))
 ```
@@ -370,7 +376,7 @@ cowplot::plot_grid(kp1, kp2, rel_widths=c(1, .5), labels=c("A", "B"))
 save(kk, kk2, kp1, kp2, file = "cache/Fig2.rda", compress='xz')
 pg <- cowplot::plot_grid(kp1, kp2, rel_widths=c(1, .5), labels=c("A", "B"))
 
-ggsave(pg, file="Figures/Fig2.png", width=14, height=6)
+ggsave(pg, file="Figures/Fig2.png", width=14, height=6, dpi=150)
 ggsave(pg, file="Figures/Fig2.pdf", width=14, height=6)
 ```
 
@@ -394,14 +400,15 @@ library(clusterProfiler)
 encode <- read.gmt("ENCODE_and_ChEA_Consensus_TFs_from_ChIP-X.txt")
 g <- bitr(genes, 'ENTREZID', 'SYMBOL', 'org.Hs.eg.db')
 x <- enricher(g$SYMBOL, TERM2GENE=encode)
-enrichplot::cnetplot(x, cex_label_gene=0.6)
+enrichplot::cnetplot(x, cex_label_gene=0.6, 
+          color_category = "#97c497", color_gene = "#c4c4c4")
 ```
 
 
 ```{r echo=FALSE, eval=FALSE}
 save(gr, genes, g, x, file = "cache/Fig3.rda", compress='xz')
-pg <- enrichplot::cnetplot(x, cex_label_gene=0.6)
-ggsave(pg, file="Figures/Fig3.png", width=10, height=7)
+pg <- enrichplot::cnetplot(x, cex_label_gene=0.6, color_category = "#97c497", color_gene = "#c4c4c4")
+ggsave(pg, file="Figures/Fig3.png", width=10, height=7, dpi=150)
 ggsave(pg, file="Figures/Fig3.pdf", width=10, height=7)
 ```
 
@@ -420,18 +427,20 @@ xx <- compareCluster(Gene~time+treatment, data=DE_GSE8057, fun = enricher,
               TERM2GENE=wp[,c("wpid", "gene")], TERM2NAME=wp[,c("wpid", "name")])
 
 pp <- dotplot(xx, x="time") + facet_grid(~treatment) + 
-    aes(x=fct_relevel(time, c('0h', '2h', '6h', '24h'))) + xlab(NULL)
+    aes(x=fct_relevel(time, c('0h', '2h', '6h', '24h'))) + xlab(NULL) +
+    scale_color_gradientn(colours=c("#b3eebe", "#46bac2", "#371ea3"),
+                    guide=guide_colorbar(reverse=TRUE, order=1)) 
 ```
 
 ```{r fig.width=9, fig.height=5, fig.cap="Comparing functional profiles among different levels of conditions."}
-print(pp)    
+print(pp)
 ```
 
 
 ```{r echo=FALSE, eval=FALSE}
 save(xx, pp, file = "cache/Fig4.rda", compress='xz')
 ggsave(pp, filename = "Figures/Fig4.pdf", width=9, height=5)
-ggsave(pp, filename = "Figures/Fig4.png", width=9, height=5)
+ggsave(pp, filename = "Figures/Fig4.png", width=9, height=5, dpi=150)
 ```
 
 \newpage
@@ -453,7 +462,9 @@ g1 <- ggplot(ego3, showCategory = 10,
   aes(richFactor, fct_reorder(Description, richFactor))) + 
   geom_segment(aes(xend=0, yend = Description)) +
   geom_point(aes(color=p.adjust, size = Count)) +
-  scale_color_viridis_c(guide=guide_colorbar(reverse=TRUE)) +
+  scale_color_gradientn(colours=c("#f7ca64", "#46bac2", "#7e62a3"),
+                      trans = "log10",
+                      guide=guide_colorbar(reverse=TRUE, order=1)) +
   scale_size_continuous(range=c(2, 10)) +
   theme_dose(12) + 
   xlab("Rich Factor") +
@@ -463,8 +474,8 @@ g1 <- ggplot(ego3, showCategory = 10,
 g2 <- ggplot(ewp2, showCategory=10, 
         aes(NES, fct_reorder(Description, NES), fill=qvalues)) + 
     geom_col() + 
-    scale_fill_continuous(low='red', high='blue', 
-                        guide=guide_colorbar(reverse=TRUE)) + 
+    scale_fill_gradientn(colours=c('#b3eebe', "#46bac2", '#371ea3'), 
+                    guide=guide_colorbar(reverse=TRUE)) + 
     theme_dose(12) + 
     xlab("Normalized Enrichment Score") + 
     ylab(NULL) + 
@@ -478,7 +489,7 @@ cowplot::plot_grid(g1, g2, labels=c("A", "B"))
 pp <- cowplot::plot_grid(g1, g2, labels=c("A", "B"))
 save(ewp2, ego3, g1, g2, file = "cache/Fig5.rda", compress='xz')
 ggsave(pp, filename = "Figures/Fig5.pdf", width=14, height=4)
-ggsave(pp, filename = "Figures/Fig5.png", width=14, height=4)
+ggsave(pp, filename = "Figures/Fig5.png", width=14, height=4, dpi=150)
 ```
 
 
