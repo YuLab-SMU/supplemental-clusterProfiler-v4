@@ -358,10 +358,10 @@ ggsave(pg, file="Figures/Fig1.png", width=17, height=9, dpi = 150)
 
 ```{r fig.width=14, fig.height=6, message=FALSE, warning=FALSE, fig.cap="KEGG pathway enrichment analysis."}
 data(geneList, package="DOSE")
-kk <- gseKEGG(geneList, organism = "hsa")
+kk <- gseKEGG(geneList, organism = "hsa", eps=0)
 
 ## sorted by absolute values of NES
-kk2 <- arrange(kk, abs(NES)) 
+kk2 <- arrange(kk, desc(abs(NES))) 
 
 ## visualization
 color <- c("#f7ca64", "#43a5bf", "#86c697", "#a670d6", "#ef998a")
