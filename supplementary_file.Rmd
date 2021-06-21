@@ -481,12 +481,12 @@ g2 <- ggplot(ewp2, showCategory=10,
     ylab(NULL) + 
     ggtitle("WikiPathways")
 
-cowplot::plot_grid(g1, g2, labels=c("A", "B"))
+cowplot::plot_grid(g1, g2, labels=c("A", "B"), rel_widths = c(1, 1.5))
 ```
 
 
 ```{r echo=FALSE, eval=FALSE}
-pp <- cowplot::plot_grid(g1, g2, labels=c("A", "B"))
+pp <- cowplot::plot_grid(g1, g2, labels=c("A", "B"), rel_widths = c(1, 1.5))
 save(ewp2, ego3, g1, g2, file = "cache/Fig5.rda", compress='xz')
 ggsave(pp, filename = "Figures/Fig5.pdf", width=14, height=4)
 ggsave(pp, filename = "Figures/Fig5.png", width=14, height=4, dpi=150)
