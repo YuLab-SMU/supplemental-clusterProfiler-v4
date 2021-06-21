@@ -453,7 +453,7 @@ library(ggplot2)
 
 ewp <- GSEA(geneList, TERM2GENE=wp[,c("wpid", "gene")], TERM2NAME=wp[,c("wpid", "name")])
 
-ewp2 <- arrange(ewp, abs(NES)) %>% 
+ewp2 <- arrange(ewp, desc(abs(NES))) %>% 
         group_by(sign(NES)) %>% 
         slice(1:5)
 ego3 <- mutate(ego, richFactor = Count / as.numeric(sub("/\\d+", "", BgRatio)))
