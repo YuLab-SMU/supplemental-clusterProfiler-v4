@@ -16,7 +16,7 @@ link-citations: yes
 **Supplemental File of**
 
 \begingroup\Large
-**clusterProfiler 4.0: A universal enrichment tool for functional and comparative study**
+**clusterProfiler 4.0: A universal enrichment tool for interpreting omics data**
 \endgroup
 
 **Tianzhi Wu^§^, Erqiang Hu^§^, Shuangbin Xu, Meijun Chen, Pingfan Guo, Zehan Dai, Tingze Feng, Lang Zhou, Wenli Tang, Li Zhan, Xiaocong Fu, Shanshan Liu, Xiaochen Bo^\*^ and Guangchuang Yu^\*^ **
@@ -86,7 +86,7 @@ To reproduce examples in this document, you need to install several extra packag
 ```r
 install.packages(c("forcats", "ggplot2", "ggnewscale", "ggupset"))
 BiocManager::install(c("org.Hs.eg.db", "enrichplot", 
-            "ChIPseeker", "TxDb.Hsapiens.UCSC.hg19.knownGene"))
+            "ChIPseeker", "TxDb.Hsapiens.UCSC.hg19.knownGene"))         
 ```
 
 
@@ -401,7 +401,8 @@ encode <- read.gmt("ENCODE_and_ChEA_Consensus_TFs_from_ChIP-X.txt")
 g <- bitr(genes, 'ENTREZID', 'SYMBOL', 'org.Hs.eg.db')
 x <- enricher(g$SYMBOL, TERM2GENE=encode)
 cnetplot(x, cex_label_gene=0.6, 
-       color_category = "#97c497", color_gene = "#c4c4c4")
+       color_category = "#97c497", color_gene = "#c4c4c4") +
+       guides(size = guide_legend(override.aes=list(shape=1)))            
 ```
 
 
