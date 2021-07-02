@@ -3,7 +3,7 @@
 
 If you use this work in published research, please cite:
 
-T Wu<sup>§</sup>, E Hu<sup>§</sup>, S Xu, M Chen, P Guo, Z Dai, T Feng, L Zhou, W Tang, L Zhan, X Fu, S Liu, X Bo<sup>\*</sup>, and **G Yu**<sup>\*</sup>. **_The Innovation_**. Accepted.
+T Wu<sup>§</sup>, E Hu<sup>§</sup>, S Xu, M Chen, P Guo, Z Dai, T Feng, L Zhou, W Tang, L Zhan, X Fu, S Liu, X Bo<sup>\*</sup>, and **G Yu**<sup>\*</sup>. clusterProfiler 4.0: A universal enrichment tool for interpreting omics data. **_The Innovation_**. Accepted.
 
 This repo contains source code and data to produce **Supplementary Material** of the above paper.
 
