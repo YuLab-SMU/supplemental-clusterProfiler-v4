@@ -354,6 +354,9 @@ ggsave(pg, file="Figures/Fig1.pdf", width=17, height=9)
 ggsave(pg, file="Figures/Fig1.png", width=17, height=9, dpi = 150)
 ```
 
+\newpage
+
+
 ## KEGG enrichment analysis
 
 ```{r fig.width=14, fig.height=6, message=FALSE, warning=FALSE, fig.cap="KEGG pathway enrichment analysis."}
@@ -369,7 +372,6 @@ kp1 <- gseaplot2(kk2, 1:5, color = color, pvalue_table=F, base_size=14)
 kp2 <- upsetplot(kk2, n=5)
 cowplot::plot_grid(kp1, kp2, rel_widths=c(1, .5), labels=c("A", "B"))
 ```
-
 
 
 ```{r echo=FALSE, eval=FALSE}
@@ -417,7 +419,7 @@ ggsave(pg, file="Figures/Fig3.pdf", width=10, height=7)
 
 ## Comparison for different conditions
 
-```{r fig.width=9, fig.height=5, fig.show='hide'}
+```{r fig.width=9, fig.height=5, fig.show='hide', warning=FALSE, message=FALSE}
 ## downloaded from https://wikipathways-data.wmcloud.org/current/gmt/
 gmt <- 'wikipathways-20210310-gmt-Homo_sapiens.gmt'
 wp <- read.gmt.wp(gmt)
@@ -449,7 +451,7 @@ ggsave(pp, filename = "Figures/Fig4.png", width=9, height=5, dpi=150)
 
 ## Visualization using ggplot2
 
-```{r message=FALSE, warning=FALSE, fig.width=14, fig.height=4, fig.cap="Visualization enrichment results using ggplot2."}
+```{r message=FALSE, warning=FALSE,  fig.width=14, fig.height=4, fig.cap="Visualization enrichment results using ggplot2."}
 library(forcats)
 library(ggplot2)
 
@@ -509,9 +511,10 @@ ggsave(pp, filename = "Figures/Fig5.pdf", width=14, height=4)
 ggsave(pp, filename = "Figures/Fig5.png", width=14, height=4, dpi=150)
 ```
 
+**NOTE:** 
 
-
-**NOTE:** source codes and datasets to produce this file can be obtained online^[<https://github.com/YuLab-SMU/supplemental-clusterProfiler-v4>].
+1. source codes and datasets to produce this file can be obtained online^[<https://github.com/YuLab-SMU/supplemental-clusterProfiler-v4>].
+2. setting font and adding rounded rectangular as background for each of the legends, as presented in the manuscript, can be done by the `ggfun`^[<https://cran.r-project.org/package=ggfun>] package.
 
 
 \newpage
