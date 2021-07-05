@@ -433,7 +433,9 @@ pp <- dotplot(xx, x="time") + facet_grid(~treatment) +
     aes(x=fct_relevel(time, c('0h', '2h', '6h', '24h'))) + xlab(NULL) +
     scale_color_gradientn(colours=c("#b3eebe", "#46bac2", "#371ea3"),
                     guide=guide_colorbar(reverse=TRUE, order=1)) +
-    guides(size = guide_legend(override.aes=list(shape=1)))                
+    guides(size = guide_legend(override.aes=list(shape=1))) +
+    theme(panel.grid.major.y = element_line(linetype='dotted', color='#808080'), 
+          panel.grid.major.x = element_blank())                 
 ```
 
 ```{r fig.width=9, fig.height=5, fig.cap="Comparing functional profiles among different levels of conditions."}
